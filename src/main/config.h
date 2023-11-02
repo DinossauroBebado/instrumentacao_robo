@@ -3,7 +3,9 @@
 #define MAX_VALUE  255 
 #define STOP_VALUE  0
 
-
+#define DHT_PIN A3
+#define RX_BLU A5
+#define TX_BLU A4 
 
 //MECHANICAL 
 

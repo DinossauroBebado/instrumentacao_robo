@@ -1,71 +1,130 @@
-#include <AFMotor.h>
+/******************************************************************************************
+ * Mapa do Sketch
+ * 1- Cabeçalho (bibliotecas, definições, variáveis e objetos globais)
+ * 2- setup()
+ * 3- loop()
+ * 4- ci74HC595Write()
+ * 5- delayPWM()
+ * 
+ * Desenvolvido por Ideias Tecnologia / Brincando com Ideias
+ */
+
 #include <Arduino.h>
 
-AF_DCMotor motor_left(3);//7,6,5
-AF_DCMotor motor_right(4);
+#define pinSH_CP  4   //Pino Clock  DIR_CLK
+#define pinST_CP  9  //Pino Latch  DIR_LATCH
+#define pinDS     8   //Pino Data   DIR_SER
+#define pinEnable 7   //Pino Enable DIR_EN
 
-void setup() 
-{
-  //Seta a velocidade inicial do motor e o para
-  motor_left.setSpeed(200);
-  motor_left.run(RELEASE);
+#define pinMotor3PWM 5
+#define pinMotor4PWM 6
 
-  motor_right.setSpeed(200);
-  motor_right.run(RELEASE);
+
+#define qtdeCI   1
+
+#define bitMotor1A 2
+#define bitMotor1B 3
+#define bitMotor2A 1
+#define bitMotor2B 4
+#define bitMotor3A 5
+#define bitMotor3B 7
+#define bitMotor4A 0
+#define bitMotor4B 6
+
+void ci74HC595Write(byte pino, bool estado);
+
+
+void delayPWM(unsigned long tempo) {
+unsigned long inicio = millis();
+byte valA0;  
+  
+  while ( (millis() - inicio) < tempo ) {
+     valA0 = map(1023, 0, 1023, 0, 255);
+     analogWrite(pinMotor1PWM, valA0);
+     analogWrite(pinMotor2PWM, valA0);
+     analogWrite(pinMotor3PWM, valA0);
+     analogWrite(pinMotor4PWM, valA0);
+  }
 }
 
-void loop() 
-{
-  uint8_t i;
 
-  // Liga o motor
+void setup() {
+   pinMode(pinSH_CP, OUTPUT);
+   pinMode(pinST_CP, OUTPUT);
+   pinMode(pinEnable, OUTPUT);
+   pinMode(pinDS, OUTPUT);
+
+   pinMode(pinMotor1PWM, OUTPUT);
+   pinMode(pinMotor2PWM, OUTPUT);
+   pinMode(pinMotor3PWM, OUTPUT);
+   pinMode(pinMotor4PWM, OUTPUT);
+
+   digitalWrite(pinEnable, LOW);
 
   
-  // Acelera de zero à velocidade máxima
-  for (i=0; i<255; i++) 
-  {
-    motor_left.setSpeed(i); 
-    motor_right.setSpeed(i); 
-    motor_left.run(FORWARD);
-    motor_right.run(BACKWARD);
-    delay(10);
-  }
-  
-  // Desacelera da velocidade máxima para zero
-  for (i=255; i!=0; i--) 
-  {
-    motor_left.setSpeed(i);  
-    motor_right.setSpeed(i);  
-    motor_left.run(BACKWARD);
-    motor_right.run(BACKWARD);
-    delay(10);
-  }
-
-  // Muda direção do motor
-  
-  
-  // Acelera de zero à velocidade máxima
-  for (i=0; i<255; i++) 
-  {
-    motor_left.setSpeed(i);  
-    motor_right.setSpeed(i);  
-    motor_left.run(BACKWARD);
-    motor_right.run(BACKWARD);
-    delay(10);
-  }
-
-  // Desacelera da velocidade máxima para zero
-  for (i=255; i!=0; i--) 
-  {
-    motor_left.setSpeed(i); 
-    motor_right.setSpeed(i); 
-    motor_left.run(FORWARD);
-    motor_right.run(FORWARD);
-    delay(10);
-  }
-
-  // Desliga o motor
-  motor_left.run(RELEASE);
-  motor_right.run(RELEASE);
-  delay(1000);
+   Serial.begin(9600);
 }
+
+void loop() {
+
+ 
+ 
+  Serial.println("Motores A=HIGH B=LOW");
+  ci74HC595Write(bitMotor3A, HIGH);
+  ci74HC595Write(bitMotor3B, LOW);
+  ci74HC595Write(bitMotor4A, HIGH);
+  ci74HC595Write(bitMotor4B, LOW);
+  delayPWM(2000);
+
+  Serial.println("Motores A=LOW B=LOW");
+  ci74HC595Write(bitMotor3A, LOW);
+  ci74HC595Write(bitMotor3B, LOW);
+  ci74HC595Write(bitMotor4A, LOW);
+  ci74HC595Write(bitMotor4B, LOW);
+  delayPWM(1000);
+
+
+  Serial.println("Motor1 A=LOW B=HIGH");
+
+  ci74HC595Write(bitMotor3A, LOW);
+  ci74HC595Write(bitMotor3B, HIGH);
+  ci74HC595Write(bitMotor4A, LOW);
+  ci74HC595Write(bitMotor4B, HIGH);
+  delayPWM(2000);
+
+  Serial.println("Motor1 A=HIGH B=HIGH");
+  
+  ci74HC595Write(bitMotor3A, HIGH);
+  ci74HC595Write(bitMotor3B, HIGH);
+  ci74HC595Write(bitMotor4A, HIGH);
+  ci74HC595Write(bitMotor4B, HIGH);
+  delayPWM(1000);
+  
+}
+
+void ci74HC595Write(byte pino, bool estado) {
+  static byte ciBuffer[qtdeCI];
+
+  bitWrite(ciBuffer[pino / 8], pino % 8, estado);
+  
+  digitalWrite(pinST_CP, LOW); //Inicia a Transmissão
+  
+  digitalWrite(pinDS, LOW);    //Apaga Tudo para Preparar Transmissão
+  digitalWrite(pinSH_CP, LOW);
+
+  for (int nC = qtdeCI-1; nC >= 0; nC--) {
+      for (int nB = 7; nB >= 0; nB--) {
+  
+          digitalWrite(pinSH_CP, LOW);  //Baixa o Clock      
+          
+          digitalWrite(pinDS,  bitRead(ciBuffer[nC], nB) );     //Escreve o BIT
+          
+          digitalWrite(pinSH_CP, HIGH); //Eleva o Clock
+          digitalWrite(pinDS, LOW);     //Baixa o Data para Previnir Vazamento      
+      }  
+  }
+  
+  digitalWrite(pinST_CP, HIGH);  //Finaliza a Transmissão
+}
+
+

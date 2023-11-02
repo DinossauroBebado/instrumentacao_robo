@@ -1,5 +1,5 @@
 #include <dht.h>        // Include library
-#define outPin 12        // Defines pin number to which the sensor is connected
+#define outPin A3        // Defines pin number to which the sensor is connected
 
 dht DHT;                // Creates a DHT object
 
