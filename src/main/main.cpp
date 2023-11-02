@@ -1,20 +1,22 @@
 
 #include "mpu.h"
 #include "config.h"
-// #include <AFMotor.h>
+#include "driver.h"
+
+Motor rightMotor = Motor(bitMotor3A, bitMotor3B, pinMotor3PWM);
+Motor leftMotor = Motor(bitMotor4A, bitMotor4B, pinMotor4PWM);
+
 #include "cinematic.h"
+
 #include <dht.h> 
 dht DHT; 
 
-#include <SoftwareSerial.h>
-SoftwareSerial mySerial(RX_BLU, TX_BLU); // RX, TX  
-String command = ""; // Stores response of bluetooth device  
-            // which simply allows n between each  
-            // response.  
 
-
-// AF_DCMotor motor_left(3);//7,6,5
-// AF_DCMotor motor_right(4);
+// #include <SoftwareSerial.h>
+// SoftwareSerial mySerial(RX_BLU, TX_BLU); // RX, TX  
+// String command = ""; // Stores response of bluetooth device  
+//             // which simply allows n between each  
+//             // response.  
 
 
 const float SET_POINT = 0 ;
@@ -33,41 +35,28 @@ float linear, angular;
 // ----------- ultrasonic sensor - distance
 
 
-// void Write_speed(int speed,AF_DCMotor motor){
-//   if(speed>0){
-//     motor.run(FORWARD);
-//   }
-
-//   if(speed<0){
-//     motor.run(BACKWARD);
-//   }
-
-//   if(abs(speed)>MAX_VALUE){
-//     speed = MAX_VALUE;
-//   }
-
-//   motor.setSpeed(speed);
-
-// }
 
 void setup(){
 
+  pinMode(pinBuzzer,OUTPUT);
+
+  // digitalWrite(pinBuzzer,HIGH);
+  
+  // digitalWrite(pinBuzzer,LOW);
+  
+
   Serial.begin(9600);
-  mySerial.begin(9600); 
+  // mySerial.begin(9600); 
 
   // check that the IMU initializes correctly
-  // _imu_connect = imu_setup();
+  _imu_connect = imu_setup();
 
-  // if(_imu_connect == 0) {
+  if(_imu_connect == 0) {
    
-  //   digitalWrite(13, HIGH); 
-  // }
+    digitalWrite(13, HIGH); 
+  }
 
-//  motor_left.setSpeed(200);
-//   motor_left.run(RELEASE);
-
-//   motor_right.setSpeed(200);
-//   motor_right.run(RELEASE);
+  
 }
 
 
@@ -83,30 +72,31 @@ void loop(){
 	float t = DHT.temperature;        // Read temperature
 	float h = DHT.humidity;           // Read humidity
 
-  // error_angular = SET_POINT - imu_ypr[0] ; 
-  // kp = error_angular*KP; 
-  // ki = ki + error_angular*KI;
+  error_angular = SET_POINT - imu_ypr[0] ; 
+  kp = error_angular*KP; 
+  ki = ki + error_angular*KI;
 
-  // pid = kp ;
+  pid = kp ;
 
-  // linear = 8;
-  // angular = pid; 
+  linear = 8;
+  angular = pid; 
 
-  // left_speed = cinematic_left(linear,angular); 
-  // right_speed = cinematic_right(linear,angular); 
-
-
+  left_speed = cinematic_left(linear,angular); 
+  right_speed = cinematic_right(linear,angular); 
 
 
-  // Write_speed(left_speed,motor_left);
-  // Write_speed(right_speed,motor_right);
+
+
+  leftMotor.drive(left_speed);
+  rightMotor.drive(right_speed);
+
 
   Serial.print("Orientation ");
   Serial.print(imu_ypr[0], 5);
-  // Serial.print(", ");
-  // Serial.print(imu_ypr[1],5);
-  // Serial.print(", ");
-  // Serial.print(imu_ypr[2],5);
+  Serial.print(", ");
+  Serial.print(imu_ypr[1],5);
+  Serial.print(", ");
+  Serial.print(imu_ypr[2],5);
 
   Serial.print(" PID|error:  ");
   Serial.print(error_angular);
@@ -124,9 +114,9 @@ void loop(){
 
   Serial.println(t);
   // String message = (String) ""+h+","+t+"";
-  String message = (String) ""+t+"";
+  // String message = (String) ""+t+"";
   
-  mySerial.println(message);
+  // mySerial.println(message);
 
   delay(100);
  

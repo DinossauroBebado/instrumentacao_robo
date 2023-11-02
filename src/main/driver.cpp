@@ -67,13 +67,13 @@ Motor::Motor(int IN1pin, int IN2pin, int PWMpin)
 
 void Motor::drive(int speed) {
 
-  if(speed > 1000)
-      speed = 1000;
+  if(speed > 255)
+      speed = 255;
 
-  if(speed < -1000)
-      speed = -1000; 
+  if(speed < -255)
+      speed = -255; 
 
-  speed = map(speed,-1000,1000,-255,255);
+  speed = map(speed,-255,255,-255,255);
 
   if(speed > 0) {
     ci74HC595Write(IN1, HIGH);
