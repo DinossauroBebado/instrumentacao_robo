@@ -7,6 +7,7 @@
 #define RX_BLU A5
 #define TX_BLU A4 
 #define pinBuzzer A2
+#define LINE_PIN A0 
 
 
 #define pinMotor3PWM 5
