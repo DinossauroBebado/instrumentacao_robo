@@ -11,11 +11,7 @@ Motor leftMotor = Motor(bitMotor4A, bitMotor4B, pinMotor4PWM);
 
 dht DHT; 
 
-
-
-// #include "mpu.h"
-
-SoftwareSerial mySerial(RX_BLU, TX_BLU); // RX, TX  
+// SoftwareSerial mySerial(RX_BLU, TX_BLU); // RX, TX  
 String command = ""; // Stores response of bluetooth device  
             // which simply allows n between each  
             // response.  
@@ -43,20 +39,12 @@ void setup(){
 
 
   Serial.begin(9600);
-  mySerial.begin(9600);
+  // mySerial.begin(9600);
   
   pinMode(LINE_PIN,INPUT);
 
-  // Show initial display buffer contents on the screen --
-  // the library initializes this with an Adafruit splash screen.
-
-
-
-  // check that the IMU initializes correctly
-  // _imu_connect = imu_setup();
-
-
-  
+  Serial.println("");
+  delay(100);
 }
 
 
@@ -64,9 +52,6 @@ void loop(){
 
 
 
-
-  // float* imu_ypr = imu_get_ypr();  
-  // float theta = imu_ypr[0];
   // //retunr from + pi to -pi 
   int readData = DHT.read11(DHT_PIN);
 
@@ -96,7 +81,7 @@ void loop(){
     angular = pid;
 
   }else{
-
+    //manual 
 
     linear = 0;
     angular = 0; 
@@ -113,13 +98,13 @@ void loop(){
   leftMotor.drive(left_speed);
   rightMotor.drive(right_speed);
 
-
-  // Serial.print("Orientation ");
-  // Serial.print(imu_ypr[0], 5);
-  // Serial.print(", ");
-  // Serial.print(imu_ypr[1],5);
-  // Serial.print(", ");
-  // Serial.print(imu_ypr[2],5);
+  Serial.print("Rotation X: ");
+  Serial.print(g.gyro.x);
+  Serial.print(", Y: ");
+  Serial.print(g.gyro.y);
+  Serial.print(", Z: ");
+  Serial.print(g.gyro.z);
+  Serial.println(" rad/s");
 
   // Serial.print(" PID|error:  ");
   // Serial.print(error_angular);
@@ -128,18 +113,18 @@ void loop(){
   // Serial.print(" pid: ");
   // Serial.print(pid);
 
-  mySerial.print(" Speed_L: ");
-  mySerial.print(left_speed);
-  mySerial.print(" Speed_R: ");
-  mySerial.print(right_speed);
+  // mySerial.print(" Speed_L: ");
+  // mySerial.print(left_speed);
+  // mySerial.print(" Speed_R: ");
+  // mySerial.print(right_speed);
  
-  mySerial.print(" T: ");
-  mySerial.print(t);
-  mySerial.print(" L :");
-  mySerial.print(ground);
-  mySerial.print(" MODE: ");
-  mySerial.print(mode ? "AUTO":"MANUAL");
-  mySerial.println("");
+  // mySerial.print(" T: ");
+  // mySerial.print(t);
+  // mySerial.print(" L :");
+  // mySerial.print(ground);
+  // mySerial.print(" MODE: ");
+  // mySerial.print(mode ? "AUTO":"MANUAL");
+  // mySerial.println("");
   // String message = (String) ""+h+","+t+"";
   // String message = (String) ""+t+"";
   
