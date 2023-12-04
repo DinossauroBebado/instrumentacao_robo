@@ -1,6 +1,6 @@
 
 #include "config.h"
-#include "driver.h"
+// #include "driver.h"
 #include "cinematic.h"
 #include <dht.h> 
 #include <SoftwareSerial.h>
@@ -11,14 +11,14 @@
 
 MFRC522 rfid(SS_PIN, RST_PIN); //PASSAGEM DE PARÂMETROS REFERENTE AOS PINOS
 
-Motor rightMotor = Motor(bitMotor2A, bitMotor2B, pinMotor2PWM);
-Motor leftMotor = Motor(bitMotor1A, bitMotor1B, pinMotor1PWM);
 
 dht DHT; 
 
 #include "AFMotor.h"
 // to motor port #2 (M3 and M4)
 AF_Stepper motor(48, 2);
+AF_DCMotor motor_right(2);
+AF_DCMotor motor_left(1);
 
 #include "Ultrasonic.h" //INCLUSÃO DA BIBLIOTECA NECESSÁRIA PARA FUNCIONAMENTO DO CÓDIGO
 Ultrasonic ultrasonic(TRIG_PIN,ECHO_PIN); //INICIALIZANDO OS PINOS DO ARDUINO
@@ -102,7 +102,9 @@ void setup(){
 
   SPI.begin(); //INICIALIZA O BARRAMENTO SPI
   rfid.PCD_Init(); //INICIALIZA MFRC522
-  motor.setSpeed(500);  // 500 rpm   
+  motor.setSpeed(500);  // 500 rpm  
+  motor_left.setSpeed(100);
+  motor_right.setSpeed(100); 
 
   
   pinMode(LINE_PIN,INPUT);
@@ -152,7 +154,7 @@ void loop(){
      //ki = ki + error_angular*KI;
 
     // pid = kp ;
-    linear = 8;
+    linear = 4;
     // angular = pid;
     angular = 0;
 
@@ -168,7 +170,7 @@ void loop(){
     //     angular = message.substring(5, 8).toFloat();
     
     // }
-     linear = 5.5;
+     linear = 0;
     // angular = pid;
     angular = 0;
 
@@ -182,8 +184,8 @@ void loop(){
   right_speed = cinematic_right(linear,angular); 
 
 
-  leftMotor.drive(left_speed);
-  rightMotor.drive(right_speed);
+  Write_speed(left_speed,motor_left);
+  Write_speed(right_speed,motor_right);
 
   //---PID------
 

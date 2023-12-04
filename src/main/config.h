@@ -29,7 +29,7 @@
 #define bitMotor4B 6
 
 #define SS_PIN 10 //PINO SDA
-#define RST_PIN 9 //PINO DE RESET
+#define RST_PIN A1//PINO DE RESET
 
 
 
