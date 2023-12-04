@@ -21,8 +21,7 @@ void setup(void) {
       Serial.println(".");
     }
   }
-  Serial.println("MPU605
-  0 Found!");
+  Serial.println("MPU605 0 Found!");
 
   mpu.setAccelerometerRange(MPU6050_RANGE_8_G);
   Serial.print("Accelerometer range set to: ");

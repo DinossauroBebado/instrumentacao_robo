@@ -6,6 +6,8 @@
 #include <SoftwareSerial.h>
 #include "filter.h"
 
+#include "mpu.h"
+
 #include <SPI.h> 
 #include <MFRC522.h> 
 
@@ -105,6 +107,7 @@ void setup(){
   motor.setSpeed(500);  // 500 rpm  
   motor_left.setSpeed(100);
   motor_right.setSpeed(100); 
+  _connect = imu_setup();
 
   
   pinMode(LINE_PIN,INPUT);
@@ -117,6 +120,8 @@ void setup(){
 void loop(){
 
 
+  float* imu_ypr = imu_get_ypr();
+  float theta = imu_ypr[0];
 
   // //retunr from + pi to -pi 
   int readData = DHT.read11(DHT_PIN);
@@ -149,9 +154,9 @@ void loop(){
       //executar meia volta e ir para o proximo objetivo 
     }
 
-    // error_angular = SET_POINT - theta ; 
-    // kp = error_angular*KP; 
-     //ki = ki + error_angular*KI;
+    error_angular = SET_POINT - theta ; 
+    kp = error_angular*KP; 
+    ki = ki + error_angular*KI;
 
     // pid = kp ;
     linear = 4;
@@ -215,7 +220,11 @@ void loop(){
   Serial.print(card_read_flag ? "card":"no card");
   Serial.print(" Dist: ");
   Serial.print(distancia);
-
+  Serial.print(" ");
+  Serial.print( "theta");
+  Serial.print(theta);
+  Serial.print(" PID ");
+  Serial.print(pid);
   Serial.println("");
 
 
