@@ -27,6 +27,7 @@ class Motor
     Motor(int IN1pin, int IN2pin, int PWMpin);
 
     void drive(int speed);
+    void steper();
 
   private:
     int IN1, IN2, PWM, STBY;

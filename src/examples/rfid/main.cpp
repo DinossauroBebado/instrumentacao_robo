@@ -17,19 +17,19 @@ void loop() {
     return; //RETORNA PARA LER NOVAMENTE
 
   /***INICIO BLOCO DE CÓDIGO RESPONSÁVEL POR GERAR A TAG RFID LIDA***/
-  String strID = "";
-  for (byte i = 0; i < 4; i++) {
-    strID +=
-    (rfid.uid.uidByte[i] < 0x10 ? "0" : "") +
-    String(rfid.uid.uidByte[i], HEX) +
-    (i!=3 ? ":" : "");
-  }
-  strID.toUpperCase();
-  /***FIM DO BLOCO DE CÓDIGO RESPONSÁVEL POR GERAR A TAG RFID LIDA***/
+    String strID = "";
+    for (byte i = 0; i < 4; i++) {
+      strID +=
+      (rfid.uid.uidByte[i] < 0x10 ? "0" : "") +
+      String(rfid.uid.uidByte[i], HEX) +
+      (i!=3 ? ":" : "");
+    }
+    strID.toUpperCase();
+    /***FIM DO BLOCO DE CÓDIGO RESPONSÁVEL POR GERAR A TAG RFID LIDA***/
 
-  Serial.print("Identificador (UID) da tag: "); //IMPRIME O TEXTO NA SERIAL
-  Serial.println(strID); //IMPRIME NA SERIAL O UID DA TAG RFID
+    Serial.print("Identificador (UID) da tag: "); //IMPRIME O TEXTO NA SERIAL
+    Serial.println(strID); //IMPRIME NA SERIAL O UID DA TAG RFID
 
-  rfid.PICC_HaltA(); //PARADA DA LEITURA DO CARTÃO
-  rfid.PCD_StopCrypto1(); //PARADA DA CRIPTOGRAFIA NO PCD
+    rfid.PICC_HaltA(); //PARADA DA LEITURA DO CARTÃO
+    rfid.PCD_StopCrypto1(); //PARADA DA CRIPTOGRAFIA NO PCD
 }

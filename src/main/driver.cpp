@@ -4,9 +4,9 @@
 
 
 #define pinSH_CP  4   //Pino Clock  DIR_CLK
-#define pinST_CP  9  //Pino Latch  DIR_LATCH
+#define pinST_CP  7  //Pino Latch  DIR_LATCH
 #define pinDS     8   //Pino Data   DIR_SER
-#define pinEnable 7   //Pino Enable DIR_EN
+
 
 #define qtdeCI   1
 
@@ -54,10 +54,8 @@ Motor::Motor(int IN1pin, int IN2pin, int PWMpin)
   pinMode(STBY, OUTPUT);
   pinMode(pinSH_CP, OUTPUT);
   pinMode(pinST_CP, OUTPUT);
-  pinMode(pinEnable, OUTPUT);
   pinMode(pinDS, OUTPUT);
 
-  digitalWrite(pinEnable, LOW);
 
 
   

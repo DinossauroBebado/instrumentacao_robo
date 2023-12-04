@@ -1,5 +1,5 @@
 
-#define TRESHOLD 300;
+#define TRESHOLD 200;
 
 bool mode ; 
 bool define_mode(int reading_ground){
