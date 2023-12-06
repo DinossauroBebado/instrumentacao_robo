@@ -6,13 +6,16 @@
 #include <SoftwareSerial.h>
 #include "filter.h"
 
-#include "mpu.h"
+
 
 #include <SPI.h> 
 #include <MFRC522.h> 
 
 MFRC522 rfid(SS_PIN, RST_PIN); //PASSAGEM DE PARÂMETROS REFERENTE AOS PINOS
 
+#include <Wire.h>
+#include "MPU6050.h"
+MPU6050 mpu;
 
 dht DHT; 
 
@@ -69,8 +72,8 @@ void hcsr04(){
     delay(5); //INTERVALO DE 5 MILISSEGUNDOS
  }
 
-// SoftwareSerial blu(RX_BLU, TX_BLU); // RX, TX  
-// String command = ""; // Stores response of bluetooth device  
+SoftwareSerial blu(RX_BLU, TX_BLU); // RX, TX  
+String command = ""; // Stores response of bluetooth device  
 //             // which simply allows n between each  
 //             // response.  
 
@@ -100,14 +103,28 @@ void setup(){
 
 
   Serial.begin(9600);
-  // blu.begin(9600);
+  blu.begin(38400.);
+
+   while(!mpu.begin(MPU6050_SCALE_2000DPS, MPU6050_RANGE_2G))
+  {
+    Serial.println("Could not find a valid MPU6050 sensor, check wiring!");
+    delay(500);
+  }
 
   SPI.begin(); //INICIALIZA O BARRAMENTO SPI
   rfid.PCD_Init(); //INICIALIZA MFRC522
   motor.setSpeed(500);  // 500 rpm  
   motor_left.setSpeed(100);
   motor_right.setSpeed(100); 
-  _connect = imu_setup();
+
+   // Calibrate gyroscope. The calibration must be at rest.
+  // If you don't want calibrate, comment this line.
+  mpu.calibrateGyro();
+
+  // Set threshold sensivty. Default 3.
+  // If you don't want use threshold, comment this line or set 0.
+  mpu.setThreshold(3);
+  
 
   
   pinMode(LINE_PIN,INPUT);
@@ -120,11 +137,11 @@ void setup(){
 void loop(){
 
 
-  float* imu_ypr = imu_get_ypr();
-  float theta = imu_ypr[0];
+  Vector rawGyro = mpu.readRawGyro();
 
+  float theta = rawGyro.ZAxis;
   // //retunr from + pi to -pi 
-  int readData = DHT.read11(DHT_PIN);
+  DHT.read11(DHT_PIN);
 
    
     
@@ -225,14 +242,16 @@ void loop(){
   Serial.print(theta);
   Serial.print(" PID ");
   Serial.print(pid);
+  Serial.print(" Temp: ");
+  Serial.print(t);
   Serial.println("");
 
 
 
-  // blu.print(" Speed_L: ");
-  // blu.print(left_speed);
-  // blu.print(" Speed_R: ");
-  // blu.print(right_speed);
+  blu.print(" Speed_L: ");
+  blu.print(left_speed);
+  blu.print(" Speed_R: ");
+  blu.print(right_speed);
  
   // blu.print(" T: ");
   // blu.print(t);
@@ -240,7 +259,7 @@ void loop(){
   // blu.print(ground);
   // blu.print(" MODE: ");
   // blu.print(mode ? "AUTO":"MANUAL");
-  // blu.println("");
+  blu.println("");
   // String message = (String) ""+h+","+t+"";
   // String message = (String) ""+t+"";
   

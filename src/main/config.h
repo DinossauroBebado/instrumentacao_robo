@@ -4,13 +4,13 @@
 #define STOP_VALUE  0
 
 #define DHT_PIN A3
-#define RX_BLU A5
+#define RX_BLU A2
 #define TX_BLU A4 
-#define pinBuzzer A2
+#define pinBuzzer A5
 #define LINE_PIN A0 
 
 #define ECHO_PIN 2 //PINO DIGITAL UTILIZADO PELO HC-SR04 ECHO(RECEBE)
-#define TRIG_PIN A2 //PINO DIGITAL UTILIZADO PELO HC-SR04 TRIG(ENVIA)
+#define TRIG_PIN A5 //PINO DIGITAL UTILIZADO PELO HC-SR04 TRIG(ENVIA)
 
 #define pinMotor3PWM 5
 #define pinMotor4PWM 6

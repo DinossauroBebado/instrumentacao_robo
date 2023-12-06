@@ -6,7 +6,9 @@
 #include <Arduino.h>
     
 //Define os pinos para a serial   
-SoftwareSerial mySerial(A5, A4); // RX, TX  
+// SoftwareSerial mySerial(A5, A4); // RX, TX  
+SoftwareSerial mySerial(2, 3); // RX, TX  
+
 String command = ""; // Stores response of bluetooth device  
             // which simply allows n between each  
             // response.  

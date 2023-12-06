@@ -1,118 +1,117 @@
-// Basic demo for accelerometer readings from Adafruit MPU6050
+/*
+    MPU6050 Triple Axis Gyroscope & Accelerometer. Simple Gyroscope Example.
+    Read more: http://www.jarzebski.pl/arduino/czujniki-i-sensory/3-osiowy-zyroskop-i-akcelerometr-mpu6050.html
+    GIT: https://github.com/jarzebski/Arduino-MPU6050
+    Web: http://www.jarzebski.pl
+    (c) 2014 by Korneliusz Jarzebski
+*/
 
-#include <Adafruit_MPU6050.h>
-#include <Adafruit_Sensor.h>
+#include <Arduino.h>
+
 #include <Wire.h>
+#include "MPU6050.h"
+#include <SoftwareSerial.h>
+#define RX_BLU A2
+#define TX_BLU A4 
+SoftwareSerial mySerial(RX_BLU, TX_BLU);
 
-Adafruit_MPU6050 mpu;
 
-void setup(void) {
+String command = ""; // Stores response of bluetooth device  
+            // which simply allows n between each  
+            // response. 
+
+MPU6050 mpu;
+
+void setup() 
+{
   Serial.begin(9600);
-  while (!Serial)
-    delay(10); // will pause Zero, Leonardo, etc until serial console opens
 
-  Serial.println("Adafruit MPU6050 test!");
-
-  // Try to initialize!
-  if (!mpu.begin()) {
-    Serial.println("Failed to find MPU6050 chip");
-    while (1) {
-      delay(10);
-      Serial.println(".");
-    }
+  // Initialize MPU6050
+  Serial.println("Initialize MPU6050");
+  while(!mpu.begin(MPU6050_SCALE_2000DPS, MPU6050_RANGE_2G))
+  {
+    Serial.println("Could not find a valid MPU6050 sensor, check wiring!");
+    delay(500);
   }
-  Serial.println("MPU605 0 Found!");
+  
+  // If you want, you can set gyroscope offsets
+  // mpu.setGyroOffsetX(155);
+  // mpu.setGyroOffsetY(15);
+  // mpu.setGyroOffsetZ(15);
+  
+  // Calibrate gyroscope. The calibration must be at rest.
+  // If you don't want calibrate, comment this line.
+  mpu.calibrateGyro();
 
-  mpu.setAccelerometerRange(MPU6050_RANGE_8_G);
-  Serial.print("Accelerometer range set to: ");
-  switch (mpu.getAccelerometerRange()) {
-  case MPU6050_RANGE_2_G:
-    Serial.println("+-2G");
-    break;
-  case MPU6050_RANGE_4_G:
-    Serial.println("+-4G");
-    break;
-  case MPU6050_RANGE_8_G:
-    Serial.println("+-8G");
-    break;
-  case MPU6050_RANGE_16_G:
-    Serial.println("+-16G");
-    break;
-  }
-  mpu.setGyroRange(MPU6050_RANGE_500_DEG);
-  Serial.print("Gyro range set to: ");
-  switch (mpu.getGyroRange()) {
-  case MPU6050_RANGE_250_DEG:
-    Serial.println("+- 250 deg/s");
-    break;
-  case MPU6050_RANGE_500_DEG:
-    Serial.println("+- 500 deg/s");
-    break;
-  case MPU6050_RANGE_1000_DEG:
-    Serial.println("+- 1000 deg/s");
-    break;
-  case MPU6050_RANGE_2000_DEG:
-    Serial.println("+- 2000 deg/s");
-    break;
-  }
+  // Set threshold sensivty. Default 3.
+  // If you don't want use threshold, comment this line or set 0.
+  mpu.setThreshold(3);
+  
+  // Check settings
+//   checkSettings();
 
-  mpu.setFilterBandwidth(MPU6050_BAND_21_HZ);
-  Serial.print("Filter bandwidth set to: ");
-  switch (mpu.getFilterBandwidth()) {
-  case MPU6050_BAND_260_HZ:
-    Serial.println("260 Hz");
-    break;
-  case MPU6050_BAND_184_HZ:
-    Serial.println("184 Hz");
-    break;
-  case MPU6050_BAND_94_HZ:
-    Serial.println("94 Hz");
-    break;
-  case MPU6050_BAND_44_HZ:
-    Serial.println("44 Hz");
-    break;
-  case MPU6050_BAND_21_HZ:
-    Serial.println("21 Hz");
-    break;
-  case MPU6050_BAND_10_HZ:
-    Serial.println("10 Hz");
-    break;
-  case MPU6050_BAND_5_HZ:
-    Serial.println("5 Hz");
-    break;
-  }
-
-  Serial.println("");
-  delay(100);
+   mySerial.begin(9600);  
 }
 
-void loop() {
-
-  /* Get new sensor events with the readings */
-  sensors_event_t a, g, temp;
-  mpu.getEvent(&a, &g, &temp);
-
-  /* Print out the values */
-  Serial.print("Acceleration X: ");
-  Serial.print(a.acceleration.x);
-  Serial.print(", Y: ");
-  Serial.print(a.acceleration.y);
-  Serial.print(", Z: ");
-  Serial.print(a.acceleration.z);
-  Serial.println(" m/s^2");
-
-  Serial.print("Rotation X: ");
-  Serial.print(g.gyro.x);
-  Serial.print(", Y: ");
-  Serial.print(g.gyro.y);
-  Serial.print(", Z: ");
-  Serial.print(g.gyro.z);
-  Serial.println(" rad/s");
-
-  Serial.print("Temperature: ");
-  Serial.print(temp.temperature);
-  Serial.println(" degC");
-
-  Serial.println("");
-  delay(500);
+void checkSettings()
+{
+  Serial.println();
+  
+  Serial.print(" * Sleep Mode:        ");
+  Serial.println(mpu.getSleepEnabled() ? "Enabled" : "Disabled");
+  
+  Serial.print(" * Clock Source:      ");
+  switch(mpu.getClockSource())
+  {
+    case MPU6050_CLOCK_KEEP_RESET:     Serial.println("Stops the clock and keeps the timing generator in reset"); break;
+    case MPU6050_CLOCK_EXTERNAL_19MHZ: Serial.println("PLL with external 19.2MHz reference"); break;
+    case MPU6050_CLOCK_EXTERNAL_32KHZ: Serial.println("PLL with external 32.768kHz reference"); break;
+    case MPU6050_CLOCK_PLL_ZGYRO:      Serial.println("PLL with Z axis gyroscope reference"); break;
+    case MPU6050_CLOCK_PLL_YGYRO:      Serial.println("PLL with Y axis gyroscope reference"); break;
+    case MPU6050_CLOCK_PLL_XGYRO:      Serial.println("PLL with X axis gyroscope reference"); break;
+    case MPU6050_CLOCK_INTERNAL_8MHZ:  Serial.println("Internal 8MHz oscillator"); break;
+  }
+  
+  Serial.print(" * Gyroscope:         ");
+  switch(mpu.getScale())
+  {
+    case MPU6050_SCALE_2000DPS:        Serial.println("2000 dps"); break;
+    case MPU6050_SCALE_1000DPS:        Serial.println("1000 dps"); break;
+    case MPU6050_SCALE_500DPS:         Serial.println("500 dps"); break;
+    case MPU6050_SCALE_250DPS:         Serial.println("250 dps"); break;
+  } 
+  
+  Serial.print(" * Gyroscope offsets: ");
+  Serial.print(mpu.getGyroOffsetX());
+  Serial.print(" / ");
+  Serial.print(mpu.getGyroOffsetY());
+  Serial.print(" / ");
+  Serial.println(mpu.getGyroOffsetZ());
+  
+  Serial.println();
 }
+
+void loop()
+{
+  Vector rawGyro = mpu.readRawGyro();
+  Vector normGyro = mpu.readNormalizeGyro();
+
+  Serial.print(" raw = ");
+  Serial.print(rawGyro.XAxis);
+  Serial.print(" raw = ");
+  Serial.print(rawGyro.YAxis);
+  Serial.print(" raw = ");
+  Serial.print(rawGyro.ZAxis);
+
+  Serial.print(" Xnorm = ");
+  Serial.print(normGyro.XAxis);
+  Serial.print(" Ynorm = ");
+  Serial.print(normGyro.YAxis);
+  Serial.print(" Znorm = ");
+  Serial.println(normGyro.ZAxis);
+
+  mySerial.println(rawGyro.ZAxis);
+  
+  delay(10);
+}
+
