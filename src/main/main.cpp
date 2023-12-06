@@ -25,6 +25,15 @@ AF_Stepper motor(48, 2);
 AF_DCMotor motor_right(2);
 AF_DCMotor motor_left(1);
 
+int step = 0 ;
+
+
+#include <Wire.h> //INCLUSÃO DE BIBLIOTECA
+#include <Adafruit_GFX.h> //INCLUSÃO DE BIBLIOTECA
+#include <Adafruit_SSD1306.h> //INCLUSÃO DE BIBLIOTECA
+ 
+Adafruit_SSD1306 display = Adafruit_SSD1306(); //OBJETO DO TIPO Adafruit_SSD1306
+
 #include "Ultrasonic.h" //INCLUSÃO DA BIBLIOTECA NECESSÁRIA PARA FUNCIONAMENTO DO CÓDIGO
 Ultrasonic ultrasonic(TRIG_PIN,ECHO_PIN); //INICIALIZANDO OS PINOS DO ARDUINO
 int distancia = -1 ; //VARIÁVEL DO TIPO INTEIRO
@@ -128,9 +137,17 @@ void setup(){
 
   
   pinMode(LINE_PIN,INPUT);
+  pinMode(pinBuzzer,OUTPUT);
+  digitalWrite(pinBuzzer,LOW);
 
   Serial.println("");
   delay(100);
+
+  Wire.begin(); //INICIALIZA A BIBLIOTECA WIRE
+  display.begin(SSD1306_SWITCHCAPVCC, 0x3C); //INICIALIZA O DISPLAY COM ENDEREÇO I2C 0x3C
+  display.setTextColor(WHITE); //DEFINE A COR DO TEXTO
+  display.setTextSize(2); //DEFINE O TAMANHO DA FONTE DO TEXTO
+  display.clearDisplay(); //LIMPA AS INFORMAÇÕES DO DISPLAY
 }
 
 
@@ -163,12 +180,18 @@ void loop(){
   if(mode){
     //auto
     hcsr04(); //atualiza a distancia 
-    motor.step(300, FORWARD, SINGLE); //movimento horario do sensor de distancia 
-    motor.step(300, BACKWARD, SINGLE); //movimento ant-horario do sensor de distancia 
+    // motor.step(300,BACKWARD, SINGLE);
+    // motor.step(300,FORWARD, SINGLE);
+
     
     if(card_read_flag){
       //busca finalizada 
       //executar meia volta e ir para o proximo objetivo 
+
+      digitalWrite(pinBuzzer,LOW);
+      Serial.println("---------------------------------------");
+      delay(200);
+      digitalWrite(pinBuzzer,HIGH);
     }
 
     error_angular = SET_POINT - theta ; 
@@ -265,8 +288,15 @@ void loop(){
   
   // blu.println(message);
 
-  delay(100);
-  
- 
-  
+  // delay(100);
+
+  display.setCursor(0,0); //POSIÇÃO EM QUE O CURSOR IRÁ FAZER A ESCRITA
+  display.print(distancia);
+  display.println(" ");
+  display.print(ground);
+  display.print(" "); 
+  display.print(t);
+  display.display(); //EFETIVA A ESCRITA NO DISPLAY
+  // display.clearDisplay(); //LIMPA AS INFORMAÇÕES DO DISPLAY
+   
 }   
